@@ -1,7 +1,7 @@
 # micmall
 
 
-简介：从0到1自建微服务架构，**采用Web和Service两层架构设计**，基本分为用户服务、用户操作服务、商品服务、库存服务、购物车和订单服务。
+简介：从0到1自建微服务架构，**采用Web和Service两层架构设计**，对外暴露HTTP接口，服务内采用RPC进行通信，基本分为用户服务、用户操作服务、商品服务、库存服务、购物车和订单服务。
 
 技术栈：**Go语言， Gorm， Gin，gRPC， Redis， MySQL， Consul， Nacos， Jaeger， Sentinel， Docker，Viper，Zap**
 
