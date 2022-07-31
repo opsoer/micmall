@@ -2,8 +2,6 @@ package api
 
 import (
 	"context"
-	sentinel "github.com/alibaba/sentinel-golang/api"
-	"github.com/alibaba/sentinel-golang/core/base"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-playground/validator/v10"
 	"net/http"
@@ -85,13 +83,7 @@ func GetUserList(ctx *gin.Context) {
 	pSize := ctx.DefaultQuery("psize", "10")
 	pSizeInt, _ := strconv.Atoi(pSize)
 
-	e, b := sentinel.Entry("general", sentinel.WithTrafficType(base.Inbound))
-	if b != nil {
-		ctx.JSON(http.StatusTooManyRequests, gin.H{
-			"msg": "请求过于频繁，请稍后重试",
-		})
-		return
-	}
+
 	rsp, err := global.UserSrvClient.GetUserList(context.WithValue(context.Background(), "ginContext", ctx), &proto.PageInfo{
 		Pn:    uint32(pnInt),
 		PSize: uint32(pSizeInt),
@@ -101,7 +93,6 @@ func GetUserList(ctx *gin.Context) {
 		HandleGrpcErrorToHttp(err, ctx)
 		return
 	}
-	e.Exit()
 
 	reMap := gin.H{
 		"total": rsp.Total,
@@ -138,13 +129,6 @@ func PassWordLogin(c *gin.Context) {
 		return
 	}
 
-	e, b := sentinel.Entry("general", sentinel.WithTrafficType(base.Inbound))
-	if b != nil {
-		c.JSON(http.StatusTooManyRequests, gin.H{
-			"msg": "请求过于频繁，请稍后重试",
-		})
-		return
-	}
 	if rsp, err := global.UserSrvClient.GetUserByMobile(context.WithValue(context.Background(), "ginContext", c), &proto.MobileRequest{
 		Mobile: passwordLoginForm.Mobile,
 	}); err != nil {
@@ -181,7 +165,6 @@ func PassWordLogin(c *gin.Context) {
 					StandardClaims: jwt.StandardClaims{
 						NotBefore: time.Now().Unix(),               //签名的生效时间
 						ExpiresAt: time.Now().Unix() + 60*60*24*30, //30天过期
-						Issuer:    "imooc",
 					},
 				}
 				token, err := j.CreateToken(claims)
@@ -205,7 +188,6 @@ func PassWordLogin(c *gin.Context) {
 			}
 		}
 	}
-	e.Exit()
 }
 
 func Register(c *gin.Context) {
@@ -216,14 +198,6 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	e, b := sentinel.Entry("general", sentinel.WithTrafficType(base.Inbound))
-	if b != nil {
-		c.JSON(http.StatusTooManyRequests, gin.H{
-			"msg": "请求过于频繁，请稍后重试",
-		})
-		e.Exit()
-		return
-	}
 	user, err := global.UserSrvClient.CreateUser(context.WithValue(context.Background(), "ginContext", c), &proto.CreateUserInfo{
 		NickName: registerForm.Mobile,
 		PassWord: registerForm.PassWord,
