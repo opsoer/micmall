@@ -14,10 +14,8 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
-	"inventory-srv/model"
-	"strconv"
-
 	"inventory-srv/global"
+	"inventory-srv/model"
 	"inventory-srv/proto"
 )
 
@@ -88,9 +86,7 @@ func (*InventoryServer) Sell(ctx context.Context, req *proto.SellInfo) (*emptypb
 		if ok, err := mutex.Unlock(); !ok || err != nil {
 			return nil, status.Errorf(codes.Internal, "释放redis分布式锁异常")
 		}
-		//删除缓存里面的商品信息 删两次，尽可能确保缓存删除了
-		client.Del(context.Background(), strconv.Itoa(int(goodInfo.GoodsId)))
-		client.Del(context.Background(), strconv.Itoa(int(goodInfo.GoodsId)))
+
 	}
 	sellDetail.Detail = details
 	//写selldetail表  判断是否归还的表

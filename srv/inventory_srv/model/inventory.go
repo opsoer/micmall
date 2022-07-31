@@ -25,7 +25,6 @@ type Inventory struct {
 	BaseModel
 	Goods   int32 `gorm:"type:int;index"` //商品id
 	Stocks  int32 `gorm:"type:int"`       //存货
-	Version int32 `gorm:"type:int"`       //分布式锁的乐观锁
 }
 
 //StockSellDetail 记录分布式事务的订单状态
