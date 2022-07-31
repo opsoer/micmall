@@ -25,6 +25,10 @@ type InvSrvConfig struct {
 	Name string `mapstructure:"name" json:"name"`
 }
 
+type RedisConfig struct {
+	Addr string `mapstructure:"addr" json:"addr"`
+	Port int32  `mapstructure:"port" json:"port"`
+}
 type ServerConfig struct {
 	Name        string         `mapstructure:"name" json:"name"`
 	Host        string         `mapstructure:"host" json:"host"`
@@ -35,6 +39,7 @@ type ServerConfig struct {
 	JWTInfo     JWTConfig      `mapstructure:"jwt" json:"jwt"`
 	ConsulInfo  ConsulConfig   `mapstructure:"consul" json:"consul"`
 	JaegerInfo  JaegerConfig   `mapstructure:"consul" json:"jaeger"`
+	RedisInfo   RedisConfig    `mapstructure:"redis" json:"redis"`
 }
 
 type NacosConfig struct {

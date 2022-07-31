@@ -234,7 +234,8 @@ func Detail(ctx *gin.Context) {
 			})
 			return
 		}
-		redisCli := redis.NewClient(&redis.Options{Addr: "192.168.16.107:6379"})
+		redisInfo := global.ServerConfig.RedisInfo
+		redisCli := redis.NewClient(&redis.Options{Addr: fmt.Sprintf("%s:%d", redisInfo.Addr, redisInfo.Port)})
 		goodsCache := redisCli.Get(context.Background(), ids)
 		if goodsCache.Err() != nil {
 			if goodsCache.Err() == redis.Nil {
@@ -264,7 +265,8 @@ func Detail(ctx *gin.Context) {
 				ctx.JSON(http.StatusOK, goodsInfoTmp)
 
 				//设置缓存
-				redisCli := redis.NewClient(&redis.Options{Addr: "192.168.16.107:6379"})
+				redisInfo := global.ServerConfig.RedisInfo
+				redisCli := redis.NewClient(&redis.Options{Addr: fmt.Sprintf("%s:%d", redisInfo.Addr, redisInfo.Port)})
 				goodsInfoJson, err := json.Marshal(goodsInfoTmp)
 				if err != nil {
 					zap.S().Error("json goodsInfoTmp err: " + err.Error())
@@ -300,7 +302,8 @@ func Delete(ctx *gin.Context) {
 		return
 	}
 	ctx.Status(http.StatusOK)
-	redisCli := redis.NewClient(&redis.Options{Addr: "192.168.16.107:6379"})
+	redisInfo := global.ServerConfig.RedisInfo
+	redisCli := redis.NewClient(&redis.Options{Addr: fmt.Sprintf("%s:%d", redisInfo.Addr, redisInfo.Port)})
 	//删除缓存里面的商品信息 删两次，尽可能确保缓存删除了
 	redisCli.Del(context.Background(), ids)
 	redisCli.Del(context.Background(), ids)
@@ -346,7 +349,8 @@ func UpdateStatus(ctx *gin.Context) {
 		HandleGrpcErrorToHttp(err, ctx)
 		return
 	}
-	redisCli := redis.NewClient(&redis.Options{Addr: "192.168.16.107:6379"})
+	redisInfo := global.ServerConfig.RedisInfo
+	redisCli := redis.NewClient(&redis.Options{Addr: fmt.Sprintf("%s:%d", redisInfo.Addr, redisInfo.Port)})
 	//删除缓存里面的商品信息 删两次，尽可能确保缓存删除了
 	redisCli.Del(context.Background(), ids)
 	redisCli.Del(context.Background(), ids)
@@ -383,7 +387,8 @@ func Update(ctx *gin.Context) {
 		return
 	}
 
-	redisCli := redis.NewClient(&redis.Options{Addr: "192.168.16.107:6379"})
+	redisInfo := global.ServerConfig.RedisInfo
+	redisCli := redis.NewClient(&redis.Options{Addr: fmt.Sprintf("%s:%d", redisInfo.Addr, redisInfo.Port)})
 	//删除缓存里面的商品信息 删两次，尽可能确保缓存删除了
 	redisCli.Del(context.Background(), ids)
 	redisCli.Del(context.Background(), ids)

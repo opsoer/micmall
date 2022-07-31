@@ -23,7 +23,7 @@ import (
 
 //库存服务
 
-type InventoryServer struct {}
+type InventoryServer struct{}
 
 func (*InventoryServer) SetInv(ctx context.Context, req *proto.GoodsInvInfo) (*emptypb.Empty, error) {
 	//设置库存， 如果我要更新库存
@@ -49,7 +49,7 @@ func (*InventoryServer) InvDetail(ctx context.Context, req *proto.GoodsInvInfo) 
 
 func (*InventoryServer) Sell(ctx context.Context, req *proto.SellInfo) (*emptypb.Empty, error) {
 	client := goredislib.NewClient(&goredislib.Options{
-		Addr: "192.168.16.107:6379",
+		Addr: fmt.Sprintf("%s:%d", global.ServerConfig.RedisInfo.Addr, global.ServerConfig.RedisInfo.Port),
 	})
 	pool := goredis.NewPool(client)
 	rs := redsync.New(pool)
