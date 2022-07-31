@@ -11,6 +11,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 	"goods-web/forms"
+	"goods-web/models"
 	"goods-web/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -218,28 +219,6 @@ func Detail(ctx *gin.Context) {
 		return
 	}
 
-	type goodsInfo struct {
-		id              int32    `json:"id"`
-		Name            string   `json:"name"`
-		GoodsBrief      string   `json:"goods_brief"` //商品简介
-		ShipFree        bool     `json:"ship_free"`
-		Images          []string `json:"images"`
-		DescImages      []string `json:"desc_images"` //商品详情的图片
-		GoodsFrontImage string   `json:"goods_front_image"`
-		ShopPrice       float32  `json:"shop_price"`
-		Category        struct {
-			Id   int32  `json:"id"`
-			Name string `json:"name"`
-		} `json:"category"`
-		Brands struct {
-			Id   int32  `json:"id"`
-			Name string `json:"name"`
-			Logo string `json:"logo"`
-		}
-		OnSale bool `json:"on_sale"`
-		IsNew  bool `json:"is_new"`
-		IsHot  bool `json:"is_hot"`
-	}
 	eb, bb := sentinel.Entry("good_detail_breaker")
 	defer eb.Exit()
 	if bb != nil {
@@ -267,8 +246,8 @@ func Detail(ctx *gin.Context) {
 					HandleGrpcErrorToHttp(err, ctx)
 					return
 				}
-				goodsInfoTmp := goodsInfo{
-					id:              r.Id,
+				goodsInfoTmp := models.GoodsInfo{
+					Id:              r.Id,
 					Name:            r.Name,
 					GoodsBrief:      r.GoodsBrief,
 					ShipFree:        r.ShipFree,
@@ -276,18 +255,11 @@ func Detail(ctx *gin.Context) {
 					DescImages:      r.DescImages,
 					GoodsFrontImage: r.GoodsFrontImage,
 					ShopPrice:       r.ShopPrice,
-					Category: struct {
-						Id   int32  `json:"id"`
-						Name string `json:"name"`
-					}{Id: r.Category.Id, Name: r.Category.Name},
-					Brands: struct {
-						Id   int32  `json:"id"`
-						Name string `json:"name"`
-						Logo string `json:"logo"`
-					}{Id: r.Brand.Id, Name: r.Brand.Name, Logo: r.Brand.Logo},
-					OnSale: r.OnSale,
-					IsNew:  r.IsNew,
-					IsHot:  r.IsHot,
+					Category:        models.Category{Id: r.Category.Id, Name: r.Category.Name},
+					Brands:          models.Brands{Id: r.Brand.Id, Name: r.Brand.Name, Logo: r.Brand.Logo},
+					OnSale:          r.OnSale,
+					IsNew:           r.IsNew,
+					IsHot:           r.IsHot,
 				}
 				ctx.JSON(http.StatusOK, goodsInfoTmp)
 
@@ -307,7 +279,7 @@ func Detail(ctx *gin.Context) {
 		if err != nil {
 			zap.S().Error("json 反解err: " + err.Error())
 		}
-		goodsInfoTmp := goodsInfo{}
+		goodsInfoTmp := models.GoodsInfo{}
 		json.Unmarshal(goodsInfoJson, &goodsInfoTmp)
 		ctx.JSON(http.StatusOK, goodsInfoJson)
 		return
