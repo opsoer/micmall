@@ -55,10 +55,23 @@ func (s *GoodsServer) GoodsList(ctx context.Context, req *proto.GoodsFilterReque
 	if req.IsHot {
 		localDB = localDB.Where(model.Goods{IsHot: true})
 	}
-
+	if req.KeyWords != "" {
+		localDB = localDB.Where("name LIKE ?", "%" + req.KeyWords + "%")
+	}
+	if req.IsNew {
+		localDB = localDB.Where(model.Goods{IsNew: true})
+	}
+	if req.PriceMin > 0 {
+		localDB = localDB.Where("shop_price>=?", req.PriceMin)
+	}
+	if req.PriceMin > 0 {
+		localDB = localDB.Where("shop_price<=?", req.PriceMax)
+	}
+	if req.Brand > 0 {
+		localDB = localDB.Where("brand_id=?", req.Brand)
+	}
 	//通过category去查询商品
 	var subQuery string
-	categoryIds := make([]interface{}, 0)
 	if req.TopCategory > 0 {
 		var category model.Category
 		if result := global.DB.First(&category, req.TopCategory); result.RowsAffected == 0 {
@@ -72,29 +85,19 @@ func (s *GoodsServer) GoodsList(ctx context.Context, req *proto.GoodsFilterReque
 		} else if category.Level == 3 {
 			subQuery = fmt.Sprintf("select id from category WHERE id=%d", req.TopCategory)
 		}
-
-		type Result struct {
-			ID int32
-		}
-		var results []Result
-		global.DB.Model(model.Category{}).Raw(subQuery).Scan(&results)
-		for _, re := range results {
-			categoryIds = append(categoryIds, re.ID)
-		}
+		localDB = localDB.Where(fmt.Sprintf("category_in in (%s)", subQuery))
 	}
 
-	//分页
-	if req.Pages == 0 {
-		req.Pages = 1
-	}
 
-	switch {
-	case req.PagePerNums > 100:
-		req.PagePerNums = 100
-	case req.PagePerNums <= 0:
-		req.PagePerNums = 10
-	}
+	var count int64
+	localDB.Count(&count)
+	goodsListResponse.Total = int32(count)
+
 	var goods []model.Goods
+	result := localDB.Preload("Category").Preload("Brands").Scopes(Paginate(int(req.Pages), int(req.PagePerNums))).Find(goods)
+	if result.Error != nil {
+		return nil, result.Error
+	}
 	for _, good := range goods {
 		goodsInfoResponse := ModelToResponse(good)
 		goodsListResponse.Data = append(goodsListResponse.Data, &goodsInfoResponse)
