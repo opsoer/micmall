@@ -10,6 +10,8 @@ import (
 	"google.golang.org/grpc"
 
 	"goods-web/utils/otgrpc"
+
+	"github.com/go-redis/redis/v8"
 )
 
 func InitSrvConn() {
@@ -38,4 +40,6 @@ func InitSrvConn() {
 
 	global.InvClient = proto.NewInventoryClient(invSrv)
 
+	redisInfo := global.ServerConfig.RedisInfo
+	global.RedisCli = redis.NewClient(&redis.Options{Addr: fmt.Sprintf("%s:%d", redisInfo.Addr, redisInfo.Port)})
 }

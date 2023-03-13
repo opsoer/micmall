@@ -234,9 +234,8 @@ func Detail(ctx *gin.Context) {
 			})
 			return
 		}
-		redisInfo := global.ServerConfig.RedisInfo
-		redisCli := redis.NewClient(&redis.Options{Addr: fmt.Sprintf("%s:%d", redisInfo.Addr, redisInfo.Port)})
-		goodsCache := redisCli.Get(context.Background(), ids)
+
+		goodsCache := global.RedisCli.Get(context.Background(), ids)
 		if goodsCache.Err() != nil {
 			if goodsCache.Err() == redis.Nil {
 				r, err := global.GoodsSrvClient.GetGoodsDetail(context.WithValue(context.Background(), "ginContext", ctx), &proto.GoodInfoRequest{
@@ -265,13 +264,11 @@ func Detail(ctx *gin.Context) {
 				ctx.JSON(http.StatusOK, goodsInfoTmp)
 
 				//设置缓存
-				redisInfo := global.ServerConfig.RedisInfo
-				redisCli := redis.NewClient(&redis.Options{Addr: fmt.Sprintf("%s:%d", redisInfo.Addr, redisInfo.Port)})
 				goodsInfoJson, err := json.Marshal(goodsInfoTmp)
 				if err != nil {
 					zap.S().Error("json goodsInfoTmp err: " + err.Error())
 				}
-				redisCli.Set(context.Background(), ids, goodsInfoJson, 30)
+				global.RedisCli.Set(context.Background(), ids, goodsInfoJson, 30)
 				return
 			}
 			zap.S().Error("redis err" + goodsCache.Err().Error())
@@ -302,11 +299,9 @@ func Delete(ctx *gin.Context) {
 		return
 	}
 	ctx.Status(http.StatusOK)
-	redisInfo := global.ServerConfig.RedisInfo
-	redisCli := redis.NewClient(&redis.Options{Addr: fmt.Sprintf("%s:%d", redisInfo.Addr, redisInfo.Port)})
 	//删除缓存里面的商品信息 删两次，尽可能确保缓存删除了
-	redisCli.Del(context.Background(), ids)
-	redisCli.Del(context.Background(), ids)
+	global.RedisCli.Del(context.Background(), ids)
+	global.RedisCli.Del(context.Background(), ids)
 	return
 }
 
@@ -349,11 +344,10 @@ func UpdateStatus(ctx *gin.Context) {
 		HandleGrpcErrorToHttp(err, ctx)
 		return
 	}
-	redisInfo := global.ServerConfig.RedisInfo
-	redisCli := redis.NewClient(&redis.Options{Addr: fmt.Sprintf("%s:%d", redisInfo.Addr, redisInfo.Port)})
+
 	//删除缓存里面的商品信息 删两次，尽可能确保缓存删除了
-	redisCli.Del(context.Background(), ids)
-	redisCli.Del(context.Background(), ids)
+	global.RedisCli.Del(context.Background(), ids)
+	global.RedisCli.Del(context.Background(), ids)
 	ctx.JSON(http.StatusOK, gin.H{
 		"msg": "修改成功",
 	})
@@ -387,11 +381,9 @@ func Update(ctx *gin.Context) {
 		return
 	}
 
-	redisInfo := global.ServerConfig.RedisInfo
-	redisCli := redis.NewClient(&redis.Options{Addr: fmt.Sprintf("%s:%d", redisInfo.Addr, redisInfo.Port)})
 	//删除缓存里面的商品信息 删两次，尽可能确保缓存删除了
-	redisCli.Del(context.Background(), ids)
-	redisCli.Del(context.Background(), ids)
+	global.RedisCli.Del(context.Background(), ids)
+	global.RedisCli.Del(context.Background(), ids)
 	ctx.JSON(http.StatusOK, gin.H{
 		"msg": "更新成功",
 	})
