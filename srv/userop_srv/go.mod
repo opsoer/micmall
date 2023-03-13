@@ -3,8 +3,6 @@ module userop-srv
 go 1.16
 
 require (
-	github.com/go-redis/redis/v8 v8.11.5
-	github.com/go-redsync/redsync/v4 v4.5.1
 	github.com/golang/protobuf v1.5.2
 	github.com/hashicorp/consul/api v1.13.1
 	github.com/nacos-group/nacos-sdk-go v1.1.1

@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/HdrHistogram/hdrhistogram-go v1.1.2 // indirect
-	github.com/alibaba/sentinel-golang v1.0.4
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/locales v0.14.0
